@@ -3,7 +3,7 @@ const path = require('path');
 const exphbs = require('express-handlebars')
 const fetch = require('node-fetch')
 const helpers = require('handlebars-helpers')(['string'])
-
+const bodyParser = require('body-parser')
 
 
 const app = express()
@@ -11,15 +11,6 @@ const app = express()
 const PORT = process.env.PORT || 5000
 
 const catchErrors = asyncFunction => (...args) => asyncFunction(...args).catch(console.error)
-
-/**
- * Middleware
- */
-app
-    .use(express.static(path.resolve(__dirname, 'public')))
-    .engine('.hbs', exphbs({ extname: '.hbs' }))
-    .set('view engine', '.hbs')
-
 
 const getCountries = catchErrors(async () => {
     const res = await fetch('https://restcountries.eu/rest/v2/all')
@@ -34,6 +25,15 @@ const getCounty = catchErrors(async (country) => {
 })
 
 /**
+ * Middleware
+ */
+app
+    .use(bodyParser())
+    .use(express.static(path.resolve(__dirname, 'public')))
+    .engine('.hbs', exphbs({ extname: '.hbs' }))
+    .set('view engine', '.hbs')
+
+/**
  * Endpoints
  */
 app.get('/', catchErrors(async (_,res) => {
@@ -41,13 +41,22 @@ app.get('/', catchErrors(async (_,res) => {
     res.render('home', { countries })
 }))
 
+app.post('/search', catchErrors(async (req,res) => {
+    const search = req.body.search
+    res.redirect(`/${search}`)
+}))
+
 app.get('/notfound', (_, res) => res.render('notFound'))
 
 app.get('/:search', catchErrors(async (req,res) => {
     const search = req.params.search
     const country = await getCounty(search)
-    console.log(country);
-    res.render('country', { country })
+
+    if(country.status !== 404) {
+        res.render('country', { country })
+    } else {
+        res.redirect('notFound')
+    }
 }))
 
 
