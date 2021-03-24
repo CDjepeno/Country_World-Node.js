@@ -17,7 +17,7 @@
 ![nodeJS](https://user-images.githubusercontent.com/43074465/112244704-e360a980-8c4f-11eb-9a05-031673a84220.png)
 
 ## Features
-- Requètes personalisé vers l'API
+- Requêtes personalisées vers l'API
 - Utilisation du moteur de template handlebars
 
 ## Getting Started
